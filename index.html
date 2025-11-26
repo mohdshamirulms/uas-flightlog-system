@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UAS Flight Log System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/dropbox@10.34.0/dist/Dropbox-sdk.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>UAS Flight Log System</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div id="totalFlightHours">Total Flight Hours: 0</div>
+            <button class="btn btn-primary" id="dropboxConnectBtn" style="display: none;">Connect to Dropbox</button>
+            <div id="dropboxStatus" style="display: none; font-size: 14px; color: var(--success);">✓ Synced with Dropbox
+            </div>
+        </div>
+    </header>
+    <main>
+        <!-- MAIN PAGE -->
+        <div id="mainPage">
+            <div class="card">
+                <h2>Create New Project</h2>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Project Name</label>
+                        <input type="text" id="projectName" />
+                    </div>
+                    <div class="field">
+                        <label>Place</label>
+                        <input type="text" id="projectPlace" />
+                    </div>
+                    <div class="field">
+                        <label>Start Date</label>
+                        <input type="date" id="projectStart" />
+                    </div>
+                    <div class="field">
+                        <label>End Date</label>
+                        <input type="date" id="projectEnd" />
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="addProjectBtn">Add Project</button>
+            </div>
+
+            <div class="card">
+                <h2>Projects</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Place</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Total Flight Hours</th>
+                                <th>Total Mandays</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectTableBody">
+                            <!-- Projects injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLIGHT LOG PAGE -->
+        <div id="flightLogPage" class="hidden">
+            <div class="header-actions">
+                <button class="btn btn-secondary back-btn" id="backToProjects">← Back to Projects</button>
+                <button class="btn btn-success" id="exportCsvBtn">Export CSV</button>
+            </div>
+            <h2 id="currentProjectTitle"></h2>
+            <div class="card">
+                <h3>Add Flight Log</h3>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Pilot Name</label>
+                        <input type="text" id="pilotName" />
+                    </div>
+                    <div class="field">
+                        <label>Drone Name</label>
+                        <input type="text" id="droneName" />
+                    </div>
+                    <div class="field">
+                        <label>Serial Number</label>
+                        <input type="text" id="serialNum" />
+                    </div>
+                    <div class="field">
+                        <label>Takeoff Time</label>
+                        <input type="datetime-local" id="takeoffTime" />
+                    </div>
+                    <div class="field">
+                        <label>Landing Time</label>
+                        <input type="datetime-local" id="landingTime" />
+                    </div>
+                    <div class="field">
+                        <label>Flight ID</label>
+                        <input type="text" id="flightId" />
+                    </div>
+                    <div class="field">
+                        <label>Battery ID</label>
+                        <input type="text" id="batteryId" />
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                    <button class="btn btn-primary" id="addFlightLogBtn">Add Flight Log</button>
+                    <button class="btn btn-secondary hidden" id="cancelEditBtn">Cancel</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Flight Logs</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pilot</th>
+                                <th>Drone Name</th>
+                                <th>Serial #</th>
+                                <th>Takeoff</th>
+                                <th>Landing</th>
+                                <th>Flight ID</th>
+                                <th>Battery ID</th>
+                                <th>Duration (min)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flightLogTableBody">
+                            <!-- Flight logs injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CREW ROSTER SECTION -->
+            <div class="card">
+                <h3>Crew Roster</h3>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Crew Name</label>
+                        <input type="text" id="crewName" />
+                    </div>
+                    <div class="field">
+                        <label>Role</label>
+                        <input type="text" id="crewRole" />
+                    </div>
+                    <div class="field">
+                        <label>Start Date</label>
+                        <input type="date" id="crewStartDate" />
+                    </div>
+                    <div class="field">
+                        <label>End Date</label>
+                        <input type="date" id="crewEndDate" />
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="addCrewBtn">Add Crew</button>
+
+                <div class="table-wrap" style="margin-top: 1rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Mandays</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crewTableBody">
+                            <!-- Crew logs injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DROPBOX CONFIGURATION
+        const DROPBOX_APP_KEY = '1gxscj4dhka8rma';
+        const DROPBOX_REDIRECT_URI = window.location.origin + window.location.pathname;
+        const DROPBOX_FILE_PATH = '/uas-flight-log-data.json';
+        const DROPBOX_TOKEN_KEY = 'dropboxAccessToken';
+
+        let dropboxClient = null;
+
+        // Initialize Dropbox
+        function initDropbox() {
+            const token = localStorage.getItem(DROPBOX_TOKEN_KEY);
+            if (token) {
+                dropboxClient = new Dropbox.Dropbox({ accessToken: token });
+                document.getElementById('dropboxConnectBtn').style.display = 'none';
+                document.getElementById('dropboxStatus').style.display = 'block';
+                loadFromDropbox();
+            } else {
+                document.getElementById('dropboxConnectBtn').style.display = 'block';
+                document.getElementById('dropboxStatus').style.display = 'none';
+            }
+        }
+
+        // Connect to Dropbox
+        function connectDropbox() {
+            const authUrl = `https://www.dropbox.com/oauth2/authorize?client_id=${DROPBOX_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DROPBOX_REDIRECT_URI)}`;
+            window.location.href = authUrl;
+        }
+
+        // Handle OAuth callback
+        function handleDropboxCallback() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+
+            if (accessToken) {
+                localStorage.setItem(DROPBOX_TOKEN_KEY, accessToken);
+                window.location.hash = '';
+                initDropbox();
+            }
+        }
+
+        // Save to Dropbox
+        async function saveToDropbox() {
+            if (!dropboxClient) return;
+
+            try {
+                const data = JSON.stringify(projects, null, 2);
+                await dropboxClient.filesUpload({
+                    path: DROPBOX_FILE_PATH,
+                    contents: data,
+                    mode: 'overwrite'
+                });
+                console.log('Data saved to Dropbox');
+            } catch (error) {
+                console.error('Error saving to Dropbox:', error);
+            }
+        }
+
+        // Load from Dropbox
+        async function loadFromDropbox() {
+            if (!dropboxClient) return;
+
+            try {
+                const response = await dropboxClient.filesDownload({ path: DROPBOX_FILE_PATH });
+                const reader = new FileReader();
+                reader.onload = function () {
+                    const dropboxProjects = JSON.parse(reader.result);
+                    // Merge with local data (Dropbox takes precedence)
+                    projects = dropboxProjects;
+                    localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+                    renderProjects();
+                    console.log('Data loaded from Dropbox');
+                };
+                reader.readAsText(response.result.fileBlob);
+            } catch (error) {
+                if (error.status === 409) {
+                    // File doesn't exist yet, save current data
+                    saveToDropbox();
+                } else {
+                    console.error('Error loading from Dropbox:', error);
+                }
+            }
+        }
+
+        // Check for OAuth callback on page load
+        handleDropboxCallback();
+        initDropbox();
+
+        document.getElementById('dropboxConnectBtn').addEventListener('click', connectDropbox);
+
+        // STORAGE KEYS
+        const PROJECTS_KEY = "uasProjects";
+
+        // ELEMENTS
+        const mainPage = document.getElementById("mainPage");
+        const flightLogPage = document.getElementById("flightLogPage");
+        const projectTableBody = document.getElementById("projectTableBody");
+        const flightLogTableBody = document.getElementById("flightLogTableBody");
+        const crewTableBody = document.getElementById("crewTableBody");
+        const totalFlightHoursElem = document.getElementById("totalFlightHours");
+
+        let projects = JSON.parse(localStorage.getItem(PROJECTS_KEY)) || [];
+        let currentProjectIndex = null;
+        let editingLogIndex = null;
+
+        function saveProjects() {
+            localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+            renderProjects();
+            saveToDropbox(); // Auto-save to Dropbox
+        }
+
+        function renderProjects() {
+            projectTableBody.innerHTML = "";
+            let totalHours = 0;
+            projects.forEach((p, i) => {
+                let projectHours = p.logs ? p.logs.reduce((sum, log) => sum + log.duration, 0) : 0;
+                totalHours += projectHours;
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+          <td>${p.name}</td>
+          <td>${p.place}</td>
+          <td>${p.start}</td>
+          <td>${p.end}</td>
+          <td>${(projectHours / 60).toFixed(2)} hrs</td>
+          <td>${calculateProjectMandays(p)}</td>
+          <td class="actions">
+            <button class="btn btn-primary" onclick="viewProject(${i})">View</button>
+            <button class="btn btn-danger" onclick="deleteProject(${i})">Delete</button>
+          </td>
+        `;
+                projectTableBody.appendChild(tr);
+            });
+            totalFlightHoursElem.textContent = `Total Flight Hours: ${(totalHours / 60).toFixed(2)}`;
+        }
+
+        function addProject() {
+            const name = document.getElementById("projectName").value.trim();
+            const place = document.getElementById("projectPlace").value.trim();
+            const start = document.getElementById("projectStart").value;
+            const end = document.getElementById("projectEnd").value;
+            if (!name || !place || !start || !end) return alert("All fields required.");
+            projects.push({ name, place, start, end, logs: [], crew: [] });
+            saveProjects();
+            document.getElementById("projectName").value = "";
+            document.getElementById("projectPlace").value = "";
+            document.getElementById("projectStart").value = "";
+            document.getElementById("projectEnd").value = "";
+        }
+
+        function deleteProject(index) {
+            if (!confirm("Delete this project?")) return;
+            projects.splice(index, 1);
+            saveProjects();
+        }
+
+        function viewProject(index) {
+            currentProjectIndex = index;
+            mainPage.classList.add("hidden");
+            flightLogPage.classList.remove("hidden");
+            document.getElementById("currentProjectTitle").textContent = projects[index].name + " - Flight Logs";
+            renderFlightLogs();
+            renderCrew();
+        }
+
+        document.getElementById("backToProjects").addEventListener("click", () => {
+            flightLogPage.classList.add("hidden");
+            mainPage.classList.remove("hidden");
+            currentProjectIndex = null;
+            renderProjects();
+        });
+
+        function renderFlightLogs() {
+            flightLogTableBody.innerHTML = "";
+            const logs = projects[currentProjectIndex].logs || [];
+            logs.forEach((log, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+          <td>${log.pilot}</td>
+          <td>${log.droneName || ''}</td>
+          <td>${log.serial}</td>
+          <td>${new Date(log.takeoff).toLocaleString()}</td>
+          <td>${new Date(log.landing).toLocaleString()}</td>
+          <td>${log.flightId}</td>
+          <td>${log.batteryId}</td>
+          <td>${log.duration}</td>
+          <td class="actions">
+            <button class="btn btn-secondary" onclick="editFlightLog(${i})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteFlightLog(${i})">Delete</button>
+          </td>
+        `;
+                flightLogTableBody.appendChild(tr);
+            });
+        }
+
+        function addFlightLog() {
+            const pilot = document.getElementById("pilotName").value.trim();
+            const droneName = document.getElementById("droneName").value.trim();
+            const serial = document.getElementById("serialNum").value.trim();
+            const takeoff = document.getElementById("takeoffTime").value;
+            const landing = document.getElementById("landingTime").value;
+            const flightId = document.getElementById("flightId").value.trim();
+            const batteryId = document.getElementById("batteryId").value.trim();
+
+            if (!pilot || !droneName || !serial || !takeoff || !landing || !flightId || !batteryId)
+                return alert("All fields required.");
+
+            const duration = calculateDuration(takeoff, landing);
+            if (duration <= 0) {
+                return alert("Landing time must be after takeoff time.");
+            }
+
+            const logData = { pilot, droneName, serial, takeoff, landing, flightId, batteryId, duration };
+
+            if (editingLogIndex !== null) {
+                // Update existing log
+                projects[currentProjectIndex].logs[editingLogIndex] = logData;
+                editingLogIndex = null;
+                document.getElementById("addFlightLogBtn").textContent = "Add Flight Log";
+                document.getElementById("cancelEditBtn").classList.add("hidden");
+            } else {
+                // Add new log
+                projects[currentProjectIndex].logs.push(logData);
+            }
+
+            saveProjects();
+            renderFlightLogs();
+            clearFlightLogForm();
+        }
+
+        function editFlightLog(index) {
+            const log = projects[currentProjectIndex].logs[index];
+            document.getElementById("pilotName").value = log.pilot;
+            document.getElementById("droneName").value = log.droneName || "";
+            document.getElementById("serialNum").value = log.serial;
+            document.getElementById("takeoffTime").value = log.takeoff;
+            document.getElementById("landingTime").value = log.landing;
+            document.getElementById("flightId").value = log.flightId;
+            document.getElementById("batteryId").value = log.batteryId;
+
+            editingLogIndex = index;
+            document.getElementById("addFlightLogBtn").textContent = "Update Flight Log";
+            document.getElementById("cancelEditBtn").classList.remove("hidden");
+
+            // Scroll to form
+            document.querySelector('#flightLogPage .card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearFlightLogForm() {
+            document.getElementById("pilotName").value = "";
+            document.getElementById("droneName").value = "";
+            document.getElementById("serialNum").value = "";
+            document.getElementById("takeoffTime").value = "";
+            document.getElementById("landingTime").value = "";
+            document.getElementById("flightId").value = "";
+            document.getElementById("batteryId").value = "";
+
+            editingLogIndex = null;
+            document.getElementById("addFlightLogBtn").textContent = "Add Flight Log";
+            document.getElementById("cancelEditBtn").classList.add("hidden");
+        }
+
+        document.getElementById("cancelEditBtn").addEventListener("click", clearFlightLogForm);
+
+        function deleteFlightLog(index) {
+            if (!confirm("Delete this flight log?")) return;
+            projects[currentProjectIndex].logs.splice(index, 1);
+            saveProjects();
+            renderFlightLogs();
+        }
+
+        function calculateDuration(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const diffMs = endDate - startDate;
+            const diffMins = Math.round(diffMs / 60000);
+            return diffMins > 0 ? diffMins : 0;
+        }
+
+        function calculateMandays(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays + 1; // Inclusive of start date
+        }
+
+        function calculateProjectMandays(project) {
+            if (!project.crew) return 0;
+            return project.crew.reduce((sum, member) => sum + (member.mandays || 0), 0);
+        }
+
+        function exportLogsToCSV() {
+            const logs = projects[currentProjectIndex].logs || [];
+            if (logs.length === 0) return alert("No logs to export.");
+
+            const headers = ["Pilot", "Drone Name", "Serial #", "Takeoff", "Landing", "Flight ID", "Battery ID", "Duration (min)"];
+            const csvRows = [headers.join(",")];
+
+            logs.forEach(log => {
+                const row = [
+                    log.pilot,
+                    log.droneName || "",
+                    log.serial,
+                    new Date(log.takeoff).toLocaleString(),
+                    new Date(log.landing).toLocaleString(),
+                    log.flightId,
+                    log.batteryId,
+                    log.duration
+                ].map(e => `"${e}"`).join(",");
+                csvRows.push(row);
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${projects[currentProjectIndex].name}_flight_logs.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById("exportCsvBtn").addEventListener("click", exportLogsToCSV);
+
+        // --- CREW ROSTER FUNCTIONS ---
+
+        function renderCrew() {
+            crewTableBody.innerHTML = "";
+            const crewLogs = projects[currentProjectIndex].crew || [];
+            crewLogs.forEach((crew, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${crew.name}</td>
+                    <td>${crew.role}</td>
+                    <td>${crew.startDate}</td>
+                    <td>${crew.endDate}</td>
+                    <td>${crew.mandays}</td>
+                    <td class="actions">
+                        <button class="btn btn-danger" onclick="deleteCrew(${i})">Delete</button>
+                    </td>
+                `;
+                crewTableBody.appendChild(tr);
+            });
+        }
+
+        function addCrew() {
+            const name = document.getElementById("crewName").value.trim();
+            const role = document.getElementById("crewRole").value.trim();
+            const startDate = document.getElementById("crewStartDate").value;
+            const endDate = document.getElementById("crewEndDate").value;
+
+            if (!name || !role || !startDate || !endDate) return alert("All fields required for crew.");
+
+            if (!projects[currentProjectIndex].crew) {
+                projects[currentProjectIndex].crew = [];
+            }
+
+            const mandays = calculateMandays(startDate, endDate);
+            projects[currentProjectIndex].crew.push({ name, role, startDate, endDate, mandays });
+            saveProjects();
+            renderCrew();
+
+            // Clear inputs
+            document.getElementById("crewName").value = "";
+            document.getElementById("crewRole").value = "";
+            document.getElementById("crewStartDate").value = "";
+            document.getElementById("crewEndDate").value = "";
+        }
+
+        function deleteCrew(index) {
+            if (!confirm("Delete this crew entry?")) return;
+            projects[currentProjectIndex].crew.splice(index, 1);
+            saveProjects();
+            renderCrew();
+        }
+
+        document.getElementById("addProjectBtn").addEventListener("click", addProject);
+        document.getElementById("addFlightLogBtn").addEventListener("click", addFlightLog);
+        document.getElementById("addCrewBtn").addEventListener("click", addCrew);
+
+        renderProjects();
+    </script>
+</body>
+
+</html>
